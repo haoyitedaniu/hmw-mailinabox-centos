@@ -46,8 +46,8 @@ fi
 
 if [ ${FIRST_TIME_SETUP:-} ]; then
     # Setup software repositories
-    dnf config-manager --set-enabled PowerTools
-    hide_output yum --assumeyes --quiet install epel-release
+    #dnf config-manager --set-enabled PowerTools
+    #hide_output yum --assumeyes --quiet install epel-release
 
     # Initialize random number generators long before we create
     # any security keys - this will allow entropy to "build up" before
@@ -111,6 +111,10 @@ PRIVATE_IP=$PRIVATE_IP
 PRIVATE_IPV6=$PRIVATE_IPV6
 EOF
 
+echo =====
+cat /etc/mailinabox.conf 
+echo =====
+
 # Start service configuration.
 source setup/system.sh
 source setup/ssl.sh
@@ -118,8 +122,11 @@ source setup/dns-local.sh
 source setup/dns.sh
 source setup/mail-postfix.sh
 
-echo Leaving start.sh...
-exit
+echo "finished mail-postfix- Tom Long" 
+
+#echo Leaving start.sh...
+#exit
+
 
 source setup/mail-dovecot.sh
 source setup/mail-users.sh

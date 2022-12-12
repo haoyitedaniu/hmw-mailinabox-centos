@@ -56,33 +56,45 @@ echo "Installing Postfix (SMTP server)..."
 # 5. Install all dependencies needed to build with `yum builddep --nobest postfix-X.Y.Z-N.el8.src.rpm`
 # 6. Build everything with `rpmbuild -ra postfix-X.Y.Z-N.el8.src.rpm`
 
-hide_output dig kinibay.org
+hide_output dig rpmfind.net
 
-wget_verify https://kinibay.org/postfix-rpms/postfix-3.3.1-8.el8.brs.x86_64.rpm \
-    e0c30d0d0ef0514e74238ab619b0ba058ea18d8a /tmp/postfix.rpm
+wget http://rpmfind.net/linux/centos/8-stream/BaseOS/x86_64/os/Packages/postfix-3.5.8-4.el8.x86_64.rpm -O /tmp/postfix.rpm
+
+#wget_verify https://kinibay.org/postfix-rpms/postfix-3.3.1-8.el8.brs.x86_64.rpm \
+#    e0c30d0d0ef0514e74238ab619b0ba058ea18d8a /tmp/postfix.rpm
+
 hide_output yum --assumeyes --quiet install /tmp/postfix.rpm
 rm /tmp/postfix.rpm
 
-wget_verify https://kinibay.org/postfix-rpms/postfix-pcre-3.3.1-8.el8.brs.x86_64.rpm \
-    a6c943835b49c9e2d16429d43ebef6013d332c3b /tmp/postfix-pcre.rpm
+#wget_verify https://kinibay.org/postfix-rpms/postfix-pcre-3.3.1-8.el8.brs.x86_64.rpm \
+#    a6c943835b49c9e2d16429d43ebef6013d332c3b /tmp/postfix-pcre.rpm
+
+wget -O /tmp/postfix-pcre.rpm http://rpmfind.net/linux/centos/8-stream/AppStream/x86_64/os/Packages/postfix-pcre-3.5.8-4.el8.x86_64.rpm 
+
 hide_output yum --assumeyes --quiet install /tmp/postfix-pcre.rpm
 rm /tmp/postfix-pcre.rpm
 
-wget_verify https://kinibay.org/postfix-rpms/postfix-sqlite-3.3.1-8.el8.brs.x86_64.rpm \
-    e0d7fa789b11f10f02ece7d5e102d457af07a12c /tmp/postfix-sqlite.rpm
+#wget_verify https://kinibay.org/postfix-rpms/postfix-sqlite-3.3.1-8.el8.brs.x86_64.rpm \
+#    e0d7fa789b11f10f02ece7d5e102d457af07a12c /tmp/postfix-sqlite.rpm
+wget -O /tmp/postfix-sqlite.rpm http://rpmfind.net/linux/centos/8-stream/AppStream/x86_64/os/Packages/postfix-sqlite-3.5.8-4.el8.x86_64.rpm
+
 hide_output yum --assumeyes --quiet install /tmp/postfix-sqlite.rpm
 rm /tmp/postfix-sqlite.rpm
 
 # Similary for postgrey, had to build our own package
-wget_verify https://kinibay.org/postgrey-rpms/postgrey-1.37-1.el8.brs.noarch.rpm \
-    de61cc869820bd8bd1ba3707331b9b503a9ff93b /tmp/postgrey.rpm
+
+
+#wget_verify https://kinibay.org/postgrey-rpms/postgrey-1.37-1.el8.brs.noarch.rpm \
+#    de61cc869820bd8bd1ba3707331b9b503a9ff93b /tmp/postgrey.rpm
+
+wget -O /tmp/postgrey.rpm http://rpmfind.net/linux/epel/8/Everything/x86_64/Packages/p/postgrey-1.37-9.el8.noarch.rpm 
 hide_output yum --assumeyes --quiet install /tmp/postgrey.rpm
 rm /tmp/postgrey.rpm
 
 # Install certificate authority certs
 hide_output yum --assumeyes --quiet install ca-certificates
 
-exit
+#exit
 
 # ### Basic Settings
 
@@ -262,7 +274,7 @@ hide_output systemctl --quiet reload firewalld
 
 # postgrey is disabled by default, so enable and then start it, but first we need to
 # create a new SELinux rule to allow /usr/bin/perl permission to bind to tcp socket 10023
-semanage port -a -t postgrey_port_t -p tcp 10023
+semanage port -m -t postgrey_port_t -p tcp 10023
 hide_output systemctl --quiet enable postgrey
 hide_output systemctl --quiet start postgrey
 

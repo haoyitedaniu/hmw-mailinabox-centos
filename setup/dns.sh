@@ -17,7 +17,7 @@ source /etc/mailinabox.conf # load global vars
 echo "Installing nsd (DNS server)..."
 
 # *********************** REMOVE AFTER NSD IN EPEL 2019-10-26
-sed -i '/^#.* /s/^#\ //' /etc/yum.repos.d/epel-testing.repo
+#sed -i '/^#.* /s/^#\ //' /etc/yum.repos.d/epel-testing.repo
 dnf config-manager --set-enabled epel-testing
 
 hide_output yum --assumeyes --quiet install nsd

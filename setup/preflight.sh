@@ -8,18 +8,18 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Check that we are running on CentOS 8
-if [ "$(sed 's/\.[0-9]\.[0-9]\{4\}.*//' /etc/redhat-release)" != "CentOS Linux release 8" ]; then
-	echo "CentOS-Mail-in-a-Box only supports being installed on CentOS 8, sorry. You are running:"
-	echo
-	if [ -e /etc/redhat-release ]; then
-        cat /etc/redhat-release
-    else
-        echo "Unknown"
-    fi
-	echo
-	echo "We can't write scripts that run on every possible setup, sorry."
-	exit
-fi
+#if [ "$(sed 's/\.[0-9]\.[0-9]\{4\}.*//' /etc/redhat-release)" != "CentOS Linux release 8" ]; then
+#	echo "CentOS-Mail-in-a-Box only supports being installed on CentOS 8, sorry. You are running:"
+#	echo
+#	if [ -e /etc/redhat-release ]; then
+#        cat /etc/redhat-release
+#    else
+#        echo "Unknown"
+#    fi
+#	echo
+#	echo "We can't write scripts that run on every possible setup, sorry."
+#	exit
+#fi
 
 # Check that we have enough memory.
 #

@@ -85,10 +85,11 @@ echo Updating system packages...
 # cronie: cron daemon to run background process periodically
 # chrony: network time protocol client
 # dnf-automatic: automatic updates, both download and install
+# sqllite :sqlite3 
 
 echo Installing support packages...
 # Install applications
-hide_output yum --assumeyes --quiet install wget curl git bc unzip
+hide_output dnf --assumeyes --quiet install wget curl git bc unzip sqlite
 # Install services/daemons that run continuously
 hide_output yum --assumeyes --quiet install cronie chrony dnf-automatic
 restart_service crond

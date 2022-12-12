@@ -45,7 +45,7 @@ you really want.
 			# user hit ESC/cancel
 			exit
 		fi
-		while ! /usr/local/lib/mailinabox/bin/python3 management/mailconfig.py validate-email "$EMAIL_ADDR"
+		while !  /usr/bin/python3 management/mailconfig.py validate-email "$EMAIL_ADDR"
 		do
 			input_box "Your Email Address" \
 				"That's not a valid email address.\n\nWhat email address are you setting this box up to manage?" \
