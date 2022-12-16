@@ -109,6 +109,7 @@ PUBLIC_IP=$PUBLIC_IP
 PUBLIC_IPV6=$PUBLIC_IPV6
 PRIVATE_IP=$PRIVATE_IP
 PRIVATE_IPV6=$PRIVATE_IPV6
+MTA_STS_MODE=${DEFAULT_MTA_STS_MODE:-enforce}
 EOF
 
 echo =====
@@ -135,12 +136,12 @@ source setup/fail2ban.sh  # move to end of installation??
 
 
 source setup/spamassassin.sh
-source setup/web.sh                    # apt_install nginx php-cli php-fpm
-source setup/webmail.sh                # Roundcube is installed from source!
-source setup/nextcloud.sh              # also a custom install!
-source setup/zpush.sh                  # php-soap php-imap libawl-php php-xsl + DOWNLOAD
-source setup/management.sh             # duplicity python-pip virtualenv certbot; pip2 install --upgrade boto; pip install --upgrade rtyaml "email_validator>=1.0.0" "exclusiveprocess" flask dnspython python-dateutil "idna>=2.0.0" "cryptography==2.2.2" boto psutil; wget jquery bootstrap
-source setup/munin.sh
+#source setup/web.sh                    # apt_install nginx php-cli php-fpm
+#source setup/webmail.sh                # Roundcube is installed from source!
+#source setup/nextcloud.sh              # also a custom install!
+#source setup/zpush.sh                  # php-soap php-imap libawl-php php-xsl + DOWNLOAD
+#source setup/management.sh              # duplicity python-pip virtualenv certbot; pip2 install --upgrade boto; pip install --upgrade rtyaml "email_validator>=1.0.0" "exclusiveprocess" flask dnspython python-dateutil "idna>=2.0.0" "cryptography==2.2.2" boto psutil; wget jquery bootstrap
+#source setup/munin.sh
 
 # Wait for the management daemon to start...
 until nc -z -w 4 127.0.0.1 10222
@@ -152,7 +153,7 @@ done
 # ...and then have it write the DNS and nginx configuration files and start those
 # services.
 tools/dns_update
-tools/web_update
+#tools/web_update
 
 # Give fail2ban another restart. The log files may not all have been present when
 # fail2ban was first configured, but they should exist now.

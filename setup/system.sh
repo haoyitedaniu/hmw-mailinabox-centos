@@ -89,7 +89,7 @@ echo Updating system packages...
 
 echo Installing support packages...
 # Install applications
-hide_output dnf --assumeyes --quiet install wget curl git bc unzip sqlite
+hide_output dnf --assumeyes --quiet install wget curl git bc unzip sqlite opendkim opendkim-tools
 # Install services/daemons that run continuously
 hide_output yum --assumeyes --quiet install cronie chrony dnf-automatic
 restart_service crond

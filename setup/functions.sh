@@ -4,6 +4,10 @@
 # -o pipefail: don't ignore errors in the non-last command in a pipeline
 set -euo pipefail
 
+PHP_VER=8.1
+#PHP_VER=
+DEFAULT_MTA_STS_MODE=enforce
+
 function hide_output {
 	# This function hides the output of a command unless the command fails
 	# and returns a non-zero exit code.

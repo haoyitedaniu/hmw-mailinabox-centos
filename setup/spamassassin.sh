@@ -1,5 +1,8 @@
 #!/bin/bash
-# Spam filtering with spamassassin via spampd
+
+
+
+# Spam filtering with spamassassin via spamd
 # -------------------------------------------
 #
 # spampd sits between postfix and dovecot. It takes mail from postfix
@@ -11,6 +14,16 @@
 
 source /etc/mailinabox.conf # get global vars
 source setup/functions.sh # load our functions
+
+
+if ! grep spampd /etc/group >/dev/null 2>&1; then
+       groupadd spampd
+fi
+
+
+if ! id -u spampd >/dev/null 2>&1; then
+        useradd -r spampd -g spampd -s /usr/bin/nologin
+fi
 
 # Install packages and basic configuration
 # ----------------------------------------
@@ -38,7 +51,7 @@ hide_output yum --quiet --assumeyes install spamassassin perl-Razor-Agent \
 
 
 # Allow spamassassin to download new rules.
-tools/editconf.py /etc/default/spamassassin \
+tools/editconf.py /etc/sysconfig/spamassassin \
 	CRON=1
 
 # Configure pyzor, which is a client to a live database of hashes of
@@ -49,11 +62,23 @@ tools/editconf.py /etc/default/spamassassin \
 # we can skip 'pyzor discover', both of which are currently broken by
 # something happening on Sourceforge (#496).
 rm -rf ~/.pyzor
-tools/editconf.py /etc/spamassassin/local.cf -s \
-	pyzor_options="--homedir /etc/spamassassin/pyzor"
-mkdir -p /etc/spamassassin/pyzor
-echo "public.pyzor.org:24441" > /etc/spamassassin/pyzor/servers
+tools/editconf.py /etc/mail/spamassassin/local.cf -s \
+	pyzor_options="--homedir /etc/mail/spamassassin/pyzor"
+mkdir -p /etc/mail/spamassassin/pyzor
+echo "public.pyzor.org:24441" > /etc/mail/spamassassin/pyzor/servers
 # check with: pyzor --homedir /etc/mail/spamassassin/pyzor ping
+
+#
+#install  spampd found here https://dl.fedoraproject.org/pub/fedora/linux/releases/37/Everything/source/tree/Packages/s/spampd-2.61-5.fc37.src.rpm 
+#
+
+echo "Installing spampd..."
+#wget https://dl.fedoraproject.org/pub/fedora/linux/releases/37/Everything/source/tree/Packages/s/spampd-2.61-5.fc37.src.rpm -O /tmp/spampd.rpm
+wget http://rpmfind.net/linux/fedora/linux/development/rawhide/Everything/x86_64/os/Packages/s/spampd-2.61-5.fc37.noarch.rpm  -O /tmp/spampd.rpm
+#http://rpmfind.net/linux/centos/8-stream/BaseOS/x86_64/os/Packages/postfix-3.5.8-4.el8.x86_64.rpm -O /tmp/postfix.rpm
+hide_output yum --assumeyes --quiet install /tmp/spampd.rpm
+rm /tmp/spampd.rpm
+
 
 # Configure spampd:
 # * Pass messages on to docevot on port 10026. This is actually the default setting but we don't
@@ -61,7 +86,7 @@ echo "public.pyzor.org:24441" > /etc/spamassassin/pyzor/servers
 # * Increase the maximum message size of scanned messages from the default of 64KB to 500KB, which
 #   is Spamassassin (spamc)'s own default. Specified in KBytes.
 # * Disable localmode so Pyzor, DKIM and DNS checks can be used.
-tools/editconf.py /etc/default/spampd \
+tools/editconf.py /etc/sysconfig/spampd \
 	DESTPORT=10026 \
 	ADDOPTS="\"--maxsize=2000\"" \
 	LOCALONLY=0
@@ -77,7 +102,7 @@ tools/editconf.py /etc/default/spampd \
 #
 # Tell Spamassassin not to modify the original message except for adding
 # the X-Spam-Status & X-Spam-Score mail headers and related headers.
-tools/editconf.py /etc/spamassassin/local.cf -s \
+tools/editconf.py /etc/mail/spamassassin/local.cf -s \
 	report_safe=0 \
 	add_header="all Report _REPORT_" \
     add_header="all Score _SCORE_"
@@ -92,14 +117,14 @@ tools/editconf.py /etc/spamassassin/local.cf -s \
 #
 # * Writable by sa-learn-pipe script below, which run as the 'mail' user, for manual tagging of mail as spam/ham.
 # * Readable by the spampd process ('spampd' user) during mail filtering.
-# * Writable by the debian-spamd user, which runs /etc/cron.daily/spamassassin.
+# * Writable by the debian-spampd user, which runs /etc/cron.daily/spamassassin.
 #
 # We'll have these files owned by spampd and grant access to the other two processes.
 #
 # Spamassassin will change the access rights back to the defaults, so we must also configure
 # the filemode in the config file.
 
-tools/editconf.py /etc/spamassassin/local.cf -s \
+tools/editconf.py /etc/mail/spamassassin/local.cf -s \
 	bayes_path=$STORAGE_ROOT/mail/spamassassin/bayes \
 	bayes_file_mode=0666
 
