@@ -148,7 +148,7 @@ fi
 # Explicity turn on and enable firewall
 # Use `firewall-cmd --list-all` to see list of open ports/services
 # By default the port for cockpit (TCP 9090) is open, close it
-hide_output systemctl enable --quiet --now firewalld
+hide_output systemctl disable --quiet --now firewalld
 hide_output firewall-cmd --quiet --permanent --remove-service=cockpit
 hide_output systemctl --quiet reload firewalld
 
