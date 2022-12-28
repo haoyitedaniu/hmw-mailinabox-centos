@@ -7,11 +7,13 @@ source /etc/mailinabox.conf # load global vars
 
 # Some Ubuntu images start off with Apache. Remove it since we
 # will use nginx. Use autoremove to remove any Apache depenencies.
-if [ -f /usr/sbin/apache2 ]; then
-	echo Removing apache...
-	hide_output apt-get -y purge apache2 apache2-*
-	hide_output apt-get -y --purge autoremove
-fi
+
+#if [ -f /usr/sbin/apache2 ]; then
+#	echo Removing apache...
+#	hide_output apt-get -y purge apache2 apache2-*
+#	hide_output apt-get -y --purge autoremove
+#fi
+
 
 # Install nginx and a PHP FastCGI daemon.
 #
@@ -56,6 +58,8 @@ tools/editconf.py /etc/php.ini -c ';' \
         default_charset="UTF-8"
 
 # Configure the path environment for php-fpm
+# see here https://tecadmin.net/install-apache-php-fpm-centos-8/ 
+
 tools/editconf.py /etc/php-fpm.d/www.conf -c ';' \
 	env[PATH]=/usr/local/bin:/usr/bin:/bin \
 
@@ -97,12 +101,14 @@ else
                 pm.max_spare_servers=18
 fi
 
+
 # Other nginx settings will be configured by the management service
 # since it depends on what domains we're serving, which we don't know
 # until mail accounts have been created.
 
 # Create the iOS/OS X Mobile Configuration file which is exposed via the
 # nginx configuration at /mailinabox-mobileconfig.
+
 mkdir -p /var/lib/mailinabox
 chmod a+rx /var/lib/mailinabox
 cat conf/ios-profile.xml \
@@ -148,9 +154,34 @@ fi
 chown -R $STORAGE_USER $STORAGE_ROOT/www
 
 # Start services.
+systemctl enable nginx
 restart_service nginx
+
+#systemctl status nginx #to check the status find  it is located at /usr/lib/systemd/system/nginx.service 
+#and nginx config file is under /etc/nginx/nginx.conf
+#and the default www html file location is at 
+#    nginx -V 2>&1 | grep --color -o -e '--prefix=[^[:space:]]\+'
+#which gives --prefix=/usr/share/nginx
+#hence the nginx html files are under /usr/share/nginx/html and /usr/share/nginx/modules
+
+#enable and start php-fpm 
+systemctl enable php-fpm
 restart_service php-fpm
 
+#to chceck the status use : systemctl status php-fpm
+# and find that the service is located at /usr/lib/systemd/system/php-fpm.service 
+# and php config file is under /etc/php.ini 
+
+
 # Open ports.
-ufw_allow http
-ufw_allow https
+#ufw_allow http
+#ufw_allow https
+
+#allow http and https using firewall-cmd
+#See here https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-using-firewalld-on-centos-7 
+
+hide_output firewall-cmd --quiet --permanent --add-service=http
+hide_output firewall-cmd --quiet --permanent --add-service=https
+hide_output systemctl --quiet reload firewalld
+
+

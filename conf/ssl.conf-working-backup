@@ -1,0 +1,41 @@
+ssl_prefer_server_ciphers on;
+
+# We track the Mozilla "intermediate" compatibility TLS recommendations.
+# Note that these settings are repeated in the SMTP and IMAP configuration.
+# ssl_protocols has moved to nginx.conf in bionic, check there for enabled protocols.
+
+#ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+#ssl_dhparam /home/user-data/ssl/dh2048.pem;
+
+# Turn on session resumption, using a 10 min cache shared across nginx processes,
+# as recommended by http://nginx.org/en/docs/http/configuring_https_servers.html
+
+ssl_session_cache shared:SSL:50m;
+ssl_session_timeout 1d;
+
+#keepalive_timeout   70;
+
+# Buffer size of 1400 bytes fits in one MTU.
+# nginx 1.5.9+ ONLY
+
+ssl_buffer_size 1400; 
+#ssl_stapling on;
+#ssl_stapling_verify on;
+resolver 127.0.0.1 valid=86400;
+resolver_timeout 10;
+
+# hint https://gist.github.com/konklone/6532544
+
+# Path to certificate and intermediates, *omitting* the root.
+#ssl_certificate /path/to/example.com.chained.crt;
+
+# Path to private key used to create certificate.
+#ssl_certificate_key /path/to/example.com.key;
+
+# The ssl_trusted_certificate is a chain of intermediates *including* the
+# root certificate, and *excluding* the cert for your domain.
+# 
+# See https://sslmate.com/blog/post/ocsp_stapling_in_apache_and_nginx
+
+#ssl_trusted_certificate /path/to/example.com.chain+root.crt;
+

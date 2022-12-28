@@ -7,8 +7,10 @@ source /etc/mailinabox.conf # load global vars
 
 # install Munin
 echo "Installing Munin (system monitoring)..."
-yum install munin munin-node libcgi-fast-perl
+dnf install munin munin-node libcgi-fast-perl
 # libcgi-fast-perl is needed by /usr/lib/munin/cgi/munin-cgi-graph
+
+exit
 
 # edit config
 cat > /etc/munin/munin.conf <<EOF;

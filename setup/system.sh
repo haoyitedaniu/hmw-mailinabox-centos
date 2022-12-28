@@ -88,12 +88,15 @@ echo Updating system packages...
 # sqllite :sqlite3 
 
 echo Installing support packages...
-# Install applications
+# Install basic applications :wget curl,gt,bc, unzip, sqlite, opendkim, opendkim-tools
+
 hide_output dnf --assumeyes --quiet install wget curl git bc unzip sqlite opendkim opendkim-tools
-# Install services/daemons that run continuously
+
+# Install services/daemons that run continuously : cronie, chrony, dnf-automatic
 hide_output yum --assumeyes --quiet install cronie chrony dnf-automatic
 restart_service crond
 restart_service chronyd
+
 # enable automatic downloads and installation of updates
 sed -i 's/apply_updates = no/apply_updates = yes/' /etc/dnf/automatic.conf
 hide_output systemctl enable --now dnf-automatic.timer
@@ -118,21 +121,28 @@ hide_output yum --assumeyes --quiet install setools setools-console setroublesho
 # setup.
 
 if [ -z "${NONINTERACTIVE:-}" ]; then
-	if [ ! -f /etc/localtime ] || [ ! -z ${FIRST_TIME_SETUP:-} ]; then
+	if [ ! -f /etc/localtime ] || [ ! -f /etc/timezone ] || [ ! -z ${FIRST_TIME_SETUP:-} ]; then
 		# If the file is missing or this is the user's first time running
 		# Mail-in-a-Box setup, run the interactive timezone configuration
 		# tool.
 		NEW_TZ=$(tzselect)
 		timedatectl set-timezone $NEW_TZ
+                echo $NEW_TZ >/etc/timezone
 		restart_service rsyslog
 	fi
 else
 	# This is a non-interactive setup so we can't ask the user.
 	# If /etc/localtime is missing, set it to UTC.
-	if [ ! -f /etc/localtime ]; then
+	if [ ! -f /etc/localtime ] || [! -f /etc/tmezone ]; then
 		echo "Setting timezone to UTC."
 		timedatectl set-timezone UTC
 		restart_service rsyslog
+		
+	fi
+	if [! -f /etc/timezone ]; then
+  		echo "Setting timezone to UTC."
+                echo "Etc/UTC" > /etc/timezone
+                restart_service rsyslog
 	fi
 fi
 
@@ -148,7 +158,7 @@ fi
 # Explicity turn on and enable firewall
 # Use `firewall-cmd --list-all` to see list of open ports/services
 # By default the port for cockpit (TCP 9090) is open, close it
-hide_output systemctl disable --quiet --now firewalld
-hide_output firewall-cmd --quiet --permanent --remove-service=cockpit
-hide_output systemctl --quiet reload firewalld
+#hide_output systemctl disable --quiet --now firewalld
+#hide_output firewall-cmd --quiet --permanent --remove-service=cockpit
+#hide_output systemctl --quiet reload firewalld
 

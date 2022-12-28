@@ -118,7 +118,7 @@ echo =====
 
 # Start service configuration.
 source setup/system.sh
-source setup/ssl.sh
+source setup/ssl.sh		#set up ssl certs in $STORAGE_USER/ssl/ folder
 source setup/dns-local.sh
 source setup/dns.sh
 source setup/mail-postfix.sh
@@ -126,7 +126,6 @@ source setup/mail-postfix.sh
 echo "finished mail-postfix- Tom Long" 
 
 #echo Leaving start.sh...
-#exit
 
 
 source setup/mail-dovecot.sh
@@ -134,14 +133,21 @@ source setup/mail-users.sh
 source setup/dkim.sh
 source setup/fail2ban.sh  # move to end of installation??
 
-
 source setup/spamassassin.sh
-#source setup/web.sh                    # apt_install nginx php-cli php-fpm
-#source setup/webmail.sh                # Roundcube is installed from source!
-#source setup/nextcloud.sh              # also a custom install!
-#source setup/zpush.sh                  # php-soap php-imap libawl-php php-xsl + DOWNLOAD
-#source setup/management.sh              # duplicity python-pip virtualenv certbot; pip2 install --upgrade boto; pip install --upgrade rtyaml "email_validator>=1.0.0" "exclusiveprocess" flask dnspython python-dateutil "idna>=2.0.0" "cryptography==2.2.2" boto psutil; wget jquery bootstrap
+source setup/web.sh                    # install nginx http server, php-fpm CGI for php
+source setup/webmail.sh                # Roundcube is installed from source!
+source setup/nextcloud.sh              # also a custom install!
+source setup/zpush.sh                  # php-soap php-imap libawl-php php-xsl + DOWNLOAD
+
+source setup/management.sh              # duplicity python-pip 
+					# virtualenv certbot; 
+					# pip2 install --upgrade boto; 
+					# pip install --upgrade rtyaml "email_validator>=1.0.0" "exclusiveprocess" 
+					# flask dnspython python-dateutil "idna>=2.0.0" 
+					#"cryptography==2.2.2" boto psutil; wget jquery bootstrap 
 #source setup/munin.sh
+
+exit
 
 # Wait for the management daemon to start...
 until nc -z -w 4 127.0.0.1 10222
@@ -153,7 +159,7 @@ done
 # ...and then have it write the DNS and nginx configuration files and start those
 # services.
 tools/dns_update
-#tools/web_update
+tools/web_update
 
 # Give fail2ban another restart. The log files may not all have been present when
 # fail2ban was first configured, but they should exist now.

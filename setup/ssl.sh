@@ -24,6 +24,12 @@
 source setup/functions.sh # load our functions
 source /etc/mailinabox.conf # load global vars
 
+#
+#Help here https://www.digitalocean.com/community/tutorials/openssl-essentials-working-with-ssl-certificates-private-keys-and-csrs 
+#
+
+
+
 # Show a status line if we are going to take any action in this file.
 if  [ ! -f /bin/openssl ] \
  || [ ! -f $STORAGE_ROOT/ssl/ssl_private_key.pem ] \
@@ -69,13 +75,24 @@ fi
 # so we can offer the user a control panel to install a better certificate.
 if [ ! -f $STORAGE_ROOT/ssl/ssl_certificate.pem ]; then
 	# Generate a certificate signing request.
+	# CSR's include information of country name, Common Name (CN)
+        #    organization name , Location Name, Organization Unit, Email address etc
+
+	#file name ot store the temporariy CSR
+
 	CSR=/tmp/ssl_cert_sign_req-$$.csr
 	hide_output \
 	openssl req -new -key $STORAGE_ROOT/ssl/ssl_private_key.pem -out $CSR \
 	  -sha256 -subj "/CN=$PRIMARY_HOSTNAME"
 
+	#other names can be added by -subj are like
+        #-subj "/C=US/ST=New York/L=Brooklyn/O=Example Brooklyn Company/CN=examplebrooklyn.com"
+	#
+
 	# Generate the self-signed certificate.
+	# name of the cert file
 	CERT=$STORAGE_ROOT/ssl/$PRIMARY_HOSTNAME-selfsigned-$(date --rfc-3339=date | sed s/-//g).pem
+	
 	hide_output \
 	openssl x509 -req -days 365 \
 	  -in $CSR -signkey $STORAGE_ROOT/ssl/ssl_private_key.pem -out $CERT
