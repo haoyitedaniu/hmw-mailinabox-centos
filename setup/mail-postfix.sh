@@ -56,6 +56,7 @@ echo "Installing Postfix (SMTP server)..."
 # 5. Install all dependencies needed to build with `yum builddep --nobest postfix-X.Y.Z-N.el8.src.rpm`
 # 6. Build everything with `rpmbuild -ra postfix-X.Y.Z-N.el8.src.rpm`
 
+
 hide_output dig rpmfind.net
 
 wget http://rpmfind.net/linux/centos/8-stream/BaseOS/x86_64/os/Packages/postfix-3.5.8-4.el8.x86_64.rpm -O /tmp/postfix.rpm

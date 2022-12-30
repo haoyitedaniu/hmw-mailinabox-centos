@@ -7,10 +7,12 @@ source /etc/mailinabox.conf # load global vars
 
 # install Munin
 echo "Installing Munin (system monitoring)..."
-dnf install munin munin-node libcgi-fast-perl
-# libcgi-fast-perl is needed by /usr/lib/munin/cgi/munin-cgi-graph
+dnf install munin munin-node
 
-exit
+#libcgi-fast-perl
+
+#dnf install libcgi-fast-perl is needed by /usr/lib/munin/cgi/munin-cgi-graph
+
 
 # edit config
 cat > /etc/munin/munin.conf <<EOF;
@@ -35,7 +37,7 @@ contact.admin.command mail -s "Munin notification \${var:host}" administrator@$P
 contact.admin.always_send warning critical
 EOF
 
-# The Debian installer touches these files and chowns them to www-data:adm for use with spawn-fcgi
+# The Debian installer touches these files and chowns them to nginx:adm for use with spawn-fcgi
 chown munin. /var/log/munin/munin-cgi-html.log
 chown munin. /var/log/munin/munin-cgi-graph.log
 

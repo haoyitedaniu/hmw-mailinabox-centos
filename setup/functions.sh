@@ -5,7 +5,6 @@
 set -euo pipefail
 
 PHP_VER=8.1
-#PHP_VER=
 DEFAULT_MTA_STS_MODE=enforce
 
 function hide_output {

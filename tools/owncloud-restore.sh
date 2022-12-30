@@ -40,10 +40,10 @@ cp "$1/owncloud.db" $STORAGE_ROOT/owncloud/
 cp "$1/config.php" $STORAGE_ROOT/owncloud/
 
 ln -sf $STORAGE_ROOT/owncloud/config.php /usr/local/lib/owncloud/config/config.php
-chown -f -R www-data.www-data $STORAGE_ROOT/owncloud /usr/local/lib/owncloud
-chown www-data.www-data $STORAGE_ROOT/owncloud/config.php
+chown -f -R nginx.nginx $STORAGE_ROOT/owncloud /usr/local/lib/owncloud
+chown nginx.nginx $STORAGE_ROOT/owncloud/config.php
 
-sudo -u www-data php$PHP_VER /usr/local/lib/owncloud/occ maintenance:mode --off
+sudo -u nginx php /usr/local/lib/owncloud/occ maintenance:mode --off
 
-service php8.0-fpm start
+service php-fpm start
 echo "Done"
