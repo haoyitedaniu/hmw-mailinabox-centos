@@ -125,8 +125,6 @@ source setup/mail-postfix.sh
 
 echo "finished mail-postfix- Tom Long" 
 
-#echo Leaving start.sh...
-
 
 source setup/mail-dovecot.sh
 source setup/mail-users.sh
@@ -145,11 +143,11 @@ source setup/management.sh              # duplicity python-pip
 					# pip install --upgrade rtyaml "email_validator>=1.0.0" "exclusiveprocess" 
 					# flask dnspython python-dateutil "idna>=2.0.0" 
 					#"cryptography==2.2.2" boto psutil; wget jquery bootstrap 
-#source setup/munin.sh
+source setup/munin.sh
 
-exit
 
-# Wait for the management daemon to start...
+echo "Wait for the management daemon to start..."
+
 until nc -z -w 4 127.0.0.1 10222
 do
 	echo Waiting for the Mail-in-a-Box management daemon to start...
@@ -165,7 +163,7 @@ tools/web_update
 # fail2ban was first configured, but they should exist now.
 restart_service fail2ban
 
-# If there aren't any mail users yet, create one.
+echo "If there aren't any mail users yet, create one..."
 source setup/firstuser.sh
 
 # Register with Let's Encrypt, including agreeing to the Terms of Service.

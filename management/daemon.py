@@ -587,8 +587,8 @@ def show_updates():
 @app.route('/system/update-packages', methods=["POST"])
 @authorized_personnel_only
 def do_updates():
-	utils.shell("check_call", ["/usr/bin/apt-get", "-qq", "update"])
-	return utils.shell("check_output", ["/usr/bin/apt-get", "-y", "upgrade"], env={
+	utils.shell("check_call", ["/usr/bin/dnf", "-qq", "update"])
+	return utils.shell("check_output", ["/usr/bin/dnf", "-y", "upgrade"], env={
 		"DEBIAN_FRONTEND": "noninteractive"
 	})
 

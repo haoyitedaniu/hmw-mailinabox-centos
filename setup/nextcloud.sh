@@ -141,7 +141,8 @@ InstallNextcloud() {
 	fi
 
 	# Fix weird permissions.
-	chmod 750 /usr/local/lib/owncloud/{apps,config}
+
+	chmod -R 750 /usr/local/lib/owncloud/{apps,config}
 
 	# Create a symlink to the config.php in STORAGE_ROOT (for upgrades we're restoring the symlink we previously
 	# put in, and in new installs we're creating a symlink and will create the actual config later).
@@ -151,7 +152,8 @@ InstallNextcloud() {
 	# $STORAGE_ROOT/owncloud may not yet exist, so use -f to suppress
 	# that error.
 	
-	chown -f -R nginx:nginx $STORAGE_ROOT/owncloud /usr/local/lib/owncloud || /bin/true
+	chown -f -R nginx.nginx $STORAGE_ROOT/owncloud /usr/local/lib/owncloud || /bin/true
+        chmod -f -R 770  $STORAGE_ROOT/owncloud /usr/local/lib/owncloud || /bin/true
 
 	# If this isn't a new installation, immediately run the upgrade script.
 	# Then check for success (0=ok and 3=no upgrade needed, both are success).
@@ -300,8 +302,9 @@ EOF
 EOF
 
 	# Set permissions
-	chown -R nginx:nginx $STORAGE_ROOT/owncloud /usr/local/lib/owncloud
-
+	chown -f -R nginx:nginx $STORAGE_ROOT/owncloud /usr/local/lib/owncloud
+        chmod -R -f  770 $STORAGE_ROOT/owncloud /usr/local/lib/owncloud 
+ 
 	# Execute Nextcloud's setup step, which creates the Nextcloud sqlite database.
 	# It also wipes it if it exists. And it updates config.php with database
 	# settings and deletes the autoconfig.php file.
@@ -354,7 +357,9 @@ echo ";";
 ?>
 EOF
 
-chown nginx:nginx $STORAGE_ROOT/owncloud/config.php
+
+chown -R nginx.nginx $STORAGE_ROOT/owncloud/config.php
+chmod -f -R 770  $STORAGE_ROOT/owncloud 
 
 # Enable/disable apps. Note that this must be done after the Nextcloud setup.
 # The firstrunwizard gave Josh all sorts of problems, so disabling that.
@@ -403,7 +408,7 @@ tools/editconf.py /etc/php.d/10-opcache.ini -c ';'  \
 # This version was probably in use in Mail-in-a-Box v0.41 (February 26, 2019) and earlier.
 # We moved to v0.6.3 in 193763f8. Ignore errors - maybe there are duplicated users with the
 # correct backend already.
-sqlite3 $STORAGE_ROOT/owncloud/owncloud.db "UPDATE oc_users_external SET backend='127.0.0.1';" || /bin/true
+#sqlite3 $STORAGE_ROOT/owncloud/owncloud.db "UPDATE oc_users_external SET backend='127.0.0.1';" || /bin/true
 
 # Set up a cron job for Nextcloud.
 cat > /etc/cron.d/mailinabox-nextcloud << EOF;

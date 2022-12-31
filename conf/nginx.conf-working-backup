@@ -65,7 +65,7 @@ http {
         }
 
 	#redirect http://haymingway.com:80 --> https://haymingway.com:443
-        return 301 https://$server_name$request_uri;
+        return 301 https://haymingway.com$request_uri;
     }
     
     server {
@@ -113,8 +113,8 @@ http {
         server_name  haymingway.com;
         root         /usr/share/nginx/html;
 	#ssl that works for https://haymingway.com
-        ssl_certificate "/etc/pki/tls/certs/letsencrypt-haymingway.com/cert.pem";
-        ssl_certificate_key "/etc/pki/tls/certs/letsencrypt-haymingway.com/privkey.pem";
+        ssl_certificate "/etc/pki/tls/certs/letsencrypt-haymingway.com/cert.pem";  # This file needs update 
+        ssl_certificate_key "/etc/pki/tls/certs/letsencrypt-haymingway.com/privkey.pem";  #This file needs update
         ssl_ciphers PROFILE=SYSTEM;
         ssl_prefer_server_ciphers on;
         include /etc/nginx/default.d/*.conf;
@@ -141,7 +141,7 @@ http {
         }
 	ssl_protocols TLSv1.2 TLSv1.3;
 	#rerdirect https://haymingway.com:443 --> https://www.haymingway.com:443
-        return 301 https://www.haymingway.com$request_uri;
+        #return 301 https://www.haymingway.com$request_uri;
     }
 
     server {

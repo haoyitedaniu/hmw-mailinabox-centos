@@ -31,8 +31,13 @@ rm -f /etc/nginx/sites-enabled/default
 # SSL settings from @konklone. Replace STORAGE_ROOT so it can find
 # the DH params.
 rm -f /etc/nginx/nginx-ssl.conf # we used to put it here
+
+#cp conf/ssl.conf-working-backup /etc/nginx/conf.d/ssl.conf
+
 sed "s#STORAGE_ROOT#$STORAGE_ROOT#" \
-	conf/nginx-ssl.conf > /etc/nginx/conf.d/ssl.conf
+	conf/ssl.conf-working-backup > /etc/nginx/conf.d/ssl.conf
+
+
 
 # Fix some nginx defaults.
 #
@@ -45,23 +50,25 @@ sed "s#STORAGE_ROOT#$STORAGE_ROOT#" \
 #
 # Drop TLSv1.0, TLSv1.1, following the Mozilla "Intermediate" recommendations
 # at https://ssl-config.mozilla.org/#server=nginx&server-version=1.17.0&config=intermediate&openssl-version=1.1.1.
-tools/editconf.py /etc/nginx/nginx.conf -s \
-	server_names_hash_bucket_size="64;" \
-	ssl_protocols="TLSv1.2 TLSv1.3;"
+
+cp conf/nginx.conf-working-backup /etc/nginx/nginx.conf 
+
+#tools/editconf.py /etc/nginx/nginx.conf -s \
+#        ssl_protocols="TLSv1.2 TLSv1.3;" \
+#	server_names_hash_bucket_size="64;" \
 
 # Tell PHP not to expose its version number in the X-Powered-By header.
-tools/editconf.py /etc/php.ini -c ';' \
-	expose_php=Off
+#tools/editconf.py /etc/php.ini -c ';' \
+#	expose_php=Off
 
 # Set PHPs default charset to UTF-8, since we use it. See #367.
-tools/editconf.py /etc/php.ini -c ';' \
-        default_charset="UTF-8"
+#tools/editconf.py /etc/php.ini -c ';' \
+#        default_charset="UTF-8"
 
 # Configure the path environment for php-fpm
 # see here https://tecadmin.net/install-apache-php-fpm-centos-8/ 
-
-tools/editconf.py /etc/php-fpm.d/www.conf -c ';' \
-	env[PATH]=/usr/local/bin:/usr/bin:/bin \
+#tools/editconf.py /etc/php-fpm.d/www.conf -c ';' \
+#	env[PATH]=/usr/local/bin:/usr/bin:/bin \
 
 # Configure php-fpm based on the amount of memory the machine has
 # This is based on the nextcloud manual for performance tuning: https://docs.nextcloud.com/server/17/admin_manual/installation/server_tuning.html

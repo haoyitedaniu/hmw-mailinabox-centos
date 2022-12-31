@@ -868,14 +868,14 @@ def list_apt_updates(apt_update=True):
 	if _apt_updates is not None and _apt_updates[0] > datetime.datetime.now() - datetime.timedelta(hours=8):
 		return _apt_updates[1]
 
-	# Run apt-get update to refresh package list. This should be running daily
+	# Run dnf update to refresh package list. This should be running daily
 	# anyway, so on the status checks page don't do this because it is slow.
 	if apt_update:
-		shell("check_call", ["/usr/bin/apt-get", "-qq", "update"])
+		shell("check_call", ["/usr/bin/dnf", "-qq", "update"])
 
-	# Run apt-get upgrade in simulate mode to get a list of what
+	# Run dnf upgrade in simulate mode to get a list of what
 	# it would do.
-	simulated_install = shell("check_output", ["/usr/bin/apt-get", "-qq", "-s", "upgrade"])
+	simulated_install = shell("check_output", ["/usr/bin/dnf", "-qq", "upgrade"])
 	pkgs = []
 	for line in simulated_install.split('\n'):
 		if line.strip() == "":
@@ -1113,8 +1113,8 @@ if __name__ == "__main__":
 			sys.exit(1)
 		sys.exit(0)
 
-	elif sys.argv[1] == "--version":
-		print(what_version_is_this(env))
+	#elif sys.argv[1] == "--version":
+	#	print(what_version_is_this(env))
 
 	elif sys.argv[1] == "--only":
 		with multiprocessing.pool.Pool(processes=10) as pool:

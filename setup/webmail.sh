@@ -22,45 +22,50 @@ source /etc/mailinabox.conf # load global vars
 
 echo "installing php remi-${PHP_VER} ..."
 
- dnf install https://rpms.remirepo.net/enterprise/remi-release-8.rpm
- dnf module reset php
- dnf module enable php:remi-${PHP_VER} #8.0
+ dnf -y install https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+ dnf -y module reset php
+ dnf -y module enable php:remi-${PHP_VER} #8.0
 
- dnf install php php-common php-cli php-mbstring 
- dnf install php-gd php-pspell php-imap
+ dnf -y install php php-common php-cli php-mbstring 
+ dnf -y install php-gd php-pspell php-imap
 
- dnf install php-sqlite3
- dnf install php-intl
- dnf install php-curl
+ dnf -y install php-sqlite3
+ dnf -y install php-intl
+ dnf -y install php-curl
 
 echo "installing web-assets-filesystem..." 
 
 wget -O /tmp/web-assets-filesystem.rpm https://rpmfind.net/linux/centos/8-stream/PowerTools/x86_64/os/Packages/web-assets-filesystem-5-7.el8.noarch.rpm 
-rpm -i /tmp/web-assets-filesystem.rpm
+hide_output yum --assumeyes --quiet install /tmp/web-assets-filesystem.rpm
+#rpm -i /tmp/web-assets-filesystem.rpm
 rm -f  /tmp/web-assets-filesystem.rpm
 
 echo "installing libjs-jquery libjs-jquery-mousewhell"
 wget -O /tmp/js-jquery.rpm https://rpmfind.net/linux/epel/8/Everything/x86_64/Packages/j/js-jquery-3.6.0-1.el8.noarch.rpm
-rpm -i /tmp/js-jquery.rpm
+
+hide_output yum --assumeyes --quiet install /tmp/js-jquery.rpm
+#rpm -i /tmp/js-jquery.rpm
 rm -f /tmp/js-jquery.rpm
 
 wget -O /tmp/js-jquery-mousewheel.rpm https://rpmfind.net/linux/epel/8/Everything/x86_64/Packages/j/js-jquery-mousewheel-3.1.13-1.el8.noarch.rpm
-rpm -i /tmp/js-jquery-mousewheel.rpm
+hide_output yum --assumeyes --quiet install /tmp/js-jquery-mousewheel.rpm
+#rpm -i /tmp/js-jquery-mousewheel.rpm
 rm -f /tmp/js-jquery-mousewheel.rpm 
 
 echo "installing libmagic1 ..."
-wget -O /tmp/file-magic.rpm 
-https://rpmfind.net/linux/opensuse/distribution/leap/15.4/repo/oss/noarch/file-magic-5.32-7.14.1.noarch.rpm
-rpm -i /tmp/file-magic.rpm
+#wget -O /tmp/file-magic.rpm https://rpmfind.net/linux/opensuse/distribution/leap/15.4/repo/oss/noarch/file-magic-5.32-7.14.1.noarch.rpm
+#hide_output yum --assumeyes --quiet install  /tmp/file-magic.rpm
+#rpm -i /tmp/file-magic.rpm
 rm -f /tmp/file-magic.rpm
 
-wget -O /tmp/file-magic.rpm wget -O /tmp/file-magic.rpm https://rpmfind.net/linux/opensuse/tumbleweed/repo/oss/noarch/file-magic-5.43-1.1.noarch.rpm
-rpm -i /tmp/file-magic.rpm
+#wget -O /tmp/file-magic.rpm https://rpmfind.net/linux/opensuse/tumbleweed/repo/oss/noarch/file-magic-5.43-1.1.noarch.rpm
+#hide_output yum --assumeyes --quiet install  /tmp/file-magic.rpm
+#rpm -i /tmp/file-magic.rpm
 rm -f /tmp/file-magic.rpm 
 
-
-wget -O /tmp/libmagic1.rpm   https://rpmfind.net/linux/opensuse/tumbleweed/repo/oss/x86_64/libmagic1-5.43-1.1.x86_64.rpm 
-rpm -i /tmp/libmagic1.rpm
+#wget -O /tmp/libmagic1.rpm   https://rpmfind.net/linux/opensuse/tumbleweed/repo/oss/x86_64/libmagic1-5.43-1.1.x86_64.rpm 
+#hide_output yum --assumeyes --quiet install /tmp/libmagic1.rpm
+#rpm -i /tmp/libmagic1.rpm
 rm -f  /tmp/libmagic1.rpm
 
 echo "Installing Roundcube (webmail)..."
@@ -219,6 +224,7 @@ EOF
 # Create writable directories.
 mkdir -p /var/log/roundcubemail /var/tmp/roundcubemail $STORAGE_ROOT/mail/roundcube
 chown -R root.nginx /var/log/roundcubemail /var/tmp/roundcubemail $STORAGE_ROOT/mail/roundcube
+chmod -R 774 /var/log/roundcubemail /var/tmp/roundcubemail $STORAGE_ROOT/mail/roundcube 
 
 # Ensure the log file monitored by fail2ban exists, or else fail2ban can't start.
 sudo -u nginx touch /var/log/roundcubemail/errors.log
@@ -253,14 +259,14 @@ chown -f -R root.nginx ${RCM_PLUGIN_DIR}/carddav
 chmod -R 774 ${RCM_PLUGIN_DIR}/carddav
 
 # Run Roundcube database migration script (database is created if it does not exist)
-php$PHP_VER ${RCM_DIR}/bin/updatedb.sh --dir ${RCM_DIR}/SQL --package roundcube
+php ${RCM_DIR}/bin/updatedb.sh --dir ${RCM_DIR}/SQL --package roundcube
 chown nginx:nginx $STORAGE_ROOT/mail/roundcube/roundcube.sqlite
 chmod 664 $STORAGE_ROOT/mail/roundcube/roundcube.sqlite
 
 # Enable PHP modules.
 #phpenmod -v $PHP_VER imap
-phpenmod imap
+#phpenmod imap  #this is only available on ubuntu 
 
 #restart_service php$PHP_VER-fpm
-restart_serice php-fpm
+restart_service php-fpm
 

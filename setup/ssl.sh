@@ -29,7 +29,6 @@ source /etc/mailinabox.conf # load global vars
 #
 
 
-
 # Show a status line if we are going to take any action in this file.
 if  [ ! -f /bin/openssl ] \
  || [ ! -f $STORAGE_ROOT/ssl/ssl_private_key.pem ] \
