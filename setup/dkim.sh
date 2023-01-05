@@ -13,6 +13,9 @@ source /etc/mailinabox.conf # load global vars
 echo Installing OpenDKIM/OpenDMARC...
 hide_output yum --assumeyes --quiet install opendkim opendmarc
 
+# make opendkim executable  #otherwise it won't open keys
+chmod -R ug+x /etc/opendkim  
+
 # Create directory to store our certificates
 mkdir -p "$STORAGE_ROOT"/mail/dkim
 

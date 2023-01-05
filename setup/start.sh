@@ -118,9 +118,23 @@ echo =====
 
 # Start service configuration.
 source setup/system.sh
-source setup/ssl.sh		#set up ssl certs in $STORAGE_USER/ssl/ folder
-source setup/dns-local.sh
-source setup/dns.sh
+
+
+source setup/ssl.sh              #set up ssl certs in $STORAGE_USER/ssl/ folder
+source setup/dns-local.sh        #set up local dns server for local services , recursive
+				 #and dns-local uses named for DNS and will change /etc/resolv.conf 
+
+source setup/dns.sh              #set up public dns server for public services , install nsd and zones etc
+                                 # nsd: The non-recursive nameserver that publishes our DNS records
+                                 # where zones are done using tools/dns_update which calls to
+                                 #  curl -s -d $POSTDATA --user $(</var/lib/mailinabox/api.key): http://127.0.0.1:10222/dns/update
+                                 #  which basically calls the management/dns_update.py do_dns_update() function
+                                 #  and http://127.0.0.1:10222 is a python flask app in /management/daemon.py
+                                 #
+                                 #
+                                 # $STORAGE_ROOT/dns/dnssec/$KSK.ds has the keys for signing the zones and the keys are rotated
+                                 # /home/user-data/dns/dnssec/
+
 source setup/mail-postfix.sh
 
 echo "finished mail-postfix- Tom Long" 
@@ -129,7 +143,7 @@ echo "finished mail-postfix- Tom Long"
 source setup/mail-dovecot.sh
 source setup/mail-users.sh
 source setup/dkim.sh
-source setup/fail2ban.sh  # move to end of installation??
+source setup/fail2ban.sh  		# move to end of installation??
 
 source setup/spamassassin.sh
 source setup/web.sh                    # install nginx http server, php-fpm CGI for php

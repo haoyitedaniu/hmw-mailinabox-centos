@@ -1,6 +1,5 @@
-#!/usr/bin/python3  
-#/usr/local/lib/mailinabox/env/bin/python3
-
+#!/usr/bin/python3
+# #/usr/local/lib/mailinabox/env/bin/python3
 # Migrates any file structures, database schemas, etc. between versions of Mail-in-a-Box.
 
 # We have to be careful here that any dependencies are already installed in the previous
@@ -182,6 +181,17 @@ def migration_12(env):
             conn.commit()
             conn.close()
 
+def migration_13(env):
+	# Add the "mfa" table for configuring MFA for login to the control panel.
+	db = os.path.join(env["STORAGE_ROOT"], 'mail/users.sqlite')
+	shell("check_call", ["sqlite3", db, "CREATE TABLE mfa (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, type TEXT NOT NULL, secret TEXT NOT NULL, mru_token TEXT, label TEXT, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE);"])
+
+def migration_14(env):
+	# Add the "auto_aliases" table.
+	db = os.path.join(env["STORAGE_ROOT"], 'mail/users.sqlite')
+	shell("check_call", ["sqlite3", db, "CREATE TABLE auto_aliases (id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT NOT NULL UNIQUE, destination TEXT NOT NULL, permitted_senders TEXT);"])
+
+###########################################################
 
 def get_current_migration():
 	ver = 0

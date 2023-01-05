@@ -34,6 +34,7 @@ def validate_email(email, mode=None):
 			allow_empty_local=(mode=="alias")
 			)
 	except EmailNotValidError:
+		print("wrong address")
 		return False
 
 	if mode == 'user':
@@ -48,8 +49,9 @@ def validate_email(email, mode=None):
 		if len(email) > 255: return False
 		if re.search(r'[^\@\.a-z0-9_\-]+', email):
 			return False
-
+	
 	# Everything looks good.
+	print("good address")
 	return True
 
 def sanitize_idn_email_address(email):
@@ -408,7 +410,7 @@ def add_mail_alias(address, forwards_to, permitted_senders, env, update_if_exist
 	# convert Unicode domain to IDNA
 	address = sanitize_idn_email_address(address)
 
-	# Our database is case sensitive (oops), which affects mail delivery
+		# Our database is case sensitive (oops), which affects mail delivery
 	# (Postfix always queries in lowercase?), so force lowercase.
 	address = address.lower()
 

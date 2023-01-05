@@ -41,6 +41,14 @@ tools/editconf.py /etc/dovecot/conf.d/10-master.conf \
 	default_vsz_limit=$(echo "`free -tm  | tail -1 | awk '{print $2}'` / 3" | bc)M \
 	log_path=/var/log/maillog
 
+tools/editconf.py /etc/dovecot/conf.d/10-master.conf \
+        default_client_limit=$(echo "2000" | bc) \
+
+ulimit -n 2000
+
+tools/editconf.py /etc/dovecot/conf.d/10-master.conf \
+        ssl_min_protocol=SSLv3
+
 # The inotify `max_user_instances` default is 128, which constrains
 # the total number of watched (IMAP IDLE push) folders by open connections.
 # See http://www.dovecot.org/pipermail/dovecot/2013-March/088834.html.
@@ -76,10 +84,10 @@ tools/editconf.py /etc/dovecot/conf.d/10-ssl.conf \
 	ssl=required \
 	"ssl_cert=<$STORAGE_ROOT/ssl/ssl_certificate.pem" \
 	"ssl_key=<$STORAGE_ROOT/ssl/ssl_private_key.pem" \
-	"ssl_protocols=!SSLv3 !SSLv2" \
+	"ssl_min_protocol=SSLv3" \
 	"ssl_cipher_list=ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS" \
-	"ssl_prefer_server_ciphers = yes" \
-	"ssl_dh_parameters_length = 2048"
+	"ssl_prefer_server_ciphers = yes"  #\
+#	"ssl_dh_parameters_length = 2048"
 
 # Disable in-the-clear IMAP/POP because there is no reason for a user to transmit
 # login credentials outside of an encrypted connection. Only the over-TLS versions
@@ -126,7 +134,6 @@ service lmtp {
     port = 10026
   }
 }
-
 protocol imap {
   mail_max_userip_connections = 20
 }
@@ -212,15 +219,12 @@ hide_output systemctl --quiet reload firewalld
 # dovecot to bind to tcp port 10026
 hide_output systemctl --quiet enable dovecot
 cat > /tmp/dovecot-tcp-10026.te << EOF;
-
 module dovecot-tcp-10026 1.0;
-
 require {
 	type dovecot_t;
 	type spamd_port_t;
 	class tcp_socket name_bind;
 }
-
 #============= dovecot_t ==============
 allow dovecot_t spamd_port_t:tcp_socket name_bind;
 EOF
@@ -232,15 +236,12 @@ rm -f /tmp/dovecot-tcp-10026.*
 
 # SELinux rule to allow dovecot acces to /var/log/maillog
 cat > /tmp/dovecot-var-log.te << EOF;
-
 module dovecot-var-log 1.0;
-
 require {
 	type var_log_t;
 	type dovecot_t;
 	class file open;
 }
-
 #============= dovecot_t ==============
 allow dovecot_t var_log_t:file open;
 EOF

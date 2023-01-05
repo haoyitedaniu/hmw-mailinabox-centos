@@ -22,6 +22,12 @@ dnf config-manager --set-enabled epel-testing
 
 hide_output yum --assumeyes --quiet install nsd
 
+hide_output yum --assumeyes --quiet install ldns
+
+#install ldns-utils 
+ wget  -O  /tmp/ldns-utils.rpm https://www.rpmfind.net/linux/mageia/distrib/7/x86_64/media/core/release/ldns-utils-1.7.0-3.mga7.x86_64.rpm
+ hide_output yum --assumeyes --quiet install /tmp/ldns-utils.rpm 
+ rm -f /tmp/ldns-utils.rpm
 
 # *********************** REMOVE AFTER NSD IN EPEL 2019-10-26
 dnf config-manager --disable epel-testing
@@ -30,6 +36,11 @@ dnf config-manager --disable epel-testing
 
 # not needed on CentOS. Dir is created on install and owned by nsd:nsd
 # mkdir -p /var/run/nsd
+#mkdir -p /etc/nsd
+mkdir -p /etc/nsd/zones   		#here is place we will add zones info 
+					#/etc/nsd/zones is writen by management/dns_update.py write_nsd_zone() function
+
+touch /etc/nsd/zones.conf
 
 cat > /etc/nsd/server.d/nsd-cmiab.conf << EOF;
 # Do not edit. Overwritten by CentOS-Mail-in-a-Box setup.
@@ -51,6 +62,34 @@ server:
 
 EOF
 
+
+# Create a directory for additional configuration directives, including
+# the zones.conf file written out by our management daemon (management/daemon.py and management/dns_update.py)
+
+mkdir -p /etc/nsd/nsd.conf.d
+
+#Note the management/dns_update will add zones  in /etc/nsd/nsd.conf.d/zones.conf  file and will reload the configuration
+#hence we must have write access to /etc/nsd/nsd.conf.d folder for the management daemon
+
+echo "include: /etc/nsd/nsd.conf.d/*.conf" >> /etc/nsd/nsd.conf;
+
+#note that /etc/nsd/nsd.conf by default includes  /etc/nsd/server.d/*
+#  include: "/etc/nsd/server.d/*.conf"
+#hence the /etc/nsd/server.d/nsd-cmiab.conf is automatically added to /etc/nsd/nsd.conf
+
+#echo "include: /etc/nsd/zones.conf" >> /etc/nsd/server.d/nsd-cmiab.conf;
+# Remove the old location of zones.conf that we generate. It will
+# now be stored in /etc/nsd/nsd.conf.d.
+rm -f /etc/nsd/zones.conf
+
+# Since we have bind9 listening on localhost for locally-generated
+# DNS queries that require a recursive nameserver, and the system
+# might have other network interfaces for e.g. tunnelling, we have
+# to be specific about the network interfaces that nsd binds to.
+for ip in $PRIVATE_IP $PRIVATE_IPV6; do
+	echo "  ip-address: $ip" >> /etc/nsd/server.d/nsd-cmiab.conf;
+done
+
 # Add log rotation
 cat > /etc/logrotate.d/nsd <<EOF;
 /var/log/nsd.log {
@@ -63,15 +102,7 @@ cat > /etc/logrotate.d/nsd <<EOF;
 }
 EOF
 
-# Since we have bind9 listening on localhost for locally-generated
-# DNS queries that require a recursive nameserver, and the system
-# might have other network interfaces for e.g. tunnelling, we have
-# to be specific about the network interfaces that nsd binds to.
-for ip in $PRIVATE_IP $PRIVATE_IPV6; do
-	echo "  ip-address: $ip" >> /etc/nsd/server.d/nsd-cmiab.conf;
-done
 
-echo "include: /etc/nsd/zones.conf" >> /etc/nsd/server.d/nsd-cmiab.conf;
 
 # Create DNSSEC signing keys.
 
@@ -95,6 +126,9 @@ mkdir -p "$STORAGE_ROOT/dns/dnssec";
 # Supports `RSASHA256` (and defaulting to this)
 #
 #  * .fund
+
+#try two algorithms algorithm 1： NSEC3RSASHA1   
+#                   algorithm 2:  RSASHA256
 
 FIRST=1 #NODOC
 for algo in NSEC3RSASHA1 RSASHA256; do
@@ -156,6 +190,9 @@ fi
 	# And loop to do the next algorithm...
 done
 
+# Create a service to update the dns and re-sign zones everyday 
+# which basically calls tools/dns_update
+#
 # Force the dns_update script to be run every day to re-sign zones for DNSSEC
 # before they expire. When we sign zones (in `dns_update.py`) we specify a
 # 30-day validation window, so we had better re-sign before then.
@@ -166,6 +203,12 @@ cat > /etc/cron.daily/mailinabox-dnssec << EOF;
 `pwd`/tools/dns_update
 EOF
 chmod +x /etc/cron.daily/mailinabox-dnssec
+
+#nsd server can be configured and run by the following commands 
+# /usr/sbin/nsd-control reconfig
+# /usr/sbin/nsd-control reload
+# /usr/sbin/service nsd start
+# /usr/sbin/service nsd status 
 
 # Permit DNS queries on TCP/UDP in the firewall.
 hide_output firewall-cmd --quiet --permanent --add-service=dns

@@ -1,7 +1,6 @@
 #!/bin/bash
 source setup/functions.sh # load our functions
 source setup/preflight.sh
-source setup/system.sh
 
 echo "Wait for the management daemon to start..."
 
@@ -13,8 +12,16 @@ done
 
 # ...and then have it write the DNS and nginx configuration files and start those
 # services.
+
+source /etc/mailinabox.conf
+
+echo "updating dns ..."
 tools/dns_update
-tools/web_update
+
+exit 0 
+
+#echo "updating web ..."
+#tools/web_update
 
 # Give fail2ban another restart. The log files may not all have been present when
 # fail2ban was first configured, but they should exist now.
